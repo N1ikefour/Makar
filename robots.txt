@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /prompts-film.md
+Disallow: /prompts-uslugi.md
+
+Sitemap: https://dentalux66.ru/sitemap.xml
