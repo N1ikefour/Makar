@@ -9,7 +9,7 @@
 <meta property="og:title" content="Стоматологическая клиника Дента Люкс">
 <meta property="og:description" content="Заботливые стоматологи вылечат ваши зубы максимально безболезненно. Свердловская область, ул. Центральная, д. 1.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="dental-hero-frame.png">
+<meta property="og:image" content="dental-hero-frame.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A6%B7%3C/text%3E%3C/svg%3E">
 <style>
   :root {
@@ -51,14 +51,20 @@
   nav {
     position: fixed; top: 3px; left: 0; right: 0; z-index: 100;
     display: flex; justify-content: space-between; align-items: center;
-    padding: 16px 5vw; mix-blend-mode: difference;
+    gap: 24px; padding: 16px 5vw; mix-blend-mode: difference;
   }
-  .logo { font-size: 20px; font-weight: 800; letter-spacing: 2px; text-decoration: none; color: var(--white); }
+  .logo { font-size: 20px; font-weight: 800; letter-spacing: 2px; text-decoration: none; color: var(--white); white-space: nowrap; flex-shrink: 0; }
   .logo span { color: var(--teal); }
-  nav .chapter-ind { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--grey); }
-  nav ul { display: flex; gap: 26px; list-style: none; }
-  nav ul a { color: var(--grey); text-decoration: none; font-size: 13px; letter-spacing: 1px; transition: color .3s; }
+  /* индикатор главы по центру — ужимается и обрезается прежде, чем задеть соседей */
+  nav .chapter-ind {
+    font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--grey);
+    text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+  }
+  nav ul { display: flex; gap: 26px; list-style: none; flex-shrink: 0; }
+  nav ul a { color: var(--grey); text-decoration: none; font-size: 13px; letter-spacing: 1px; transition: color .3s; white-space: nowrap; }
   nav ul a:hover { color: var(--teal); }
+  /* узкий десктоп/планшет: индикатор главы начал бы тесниться к меню — прячем его */
+  @media (max-width: 1120px) { nav .chapter-ind { display: none; } }
 
   /* letterbox bars */
   .bar { position: fixed; left: 0; right: 0; height: 0; background: #000; z-index: 95; pointer-events: none; }
@@ -192,7 +198,6 @@
     .chapter .cap { bottom: 10vh; left: 5vw; right: 5vw; max-width: none; }
     .chapter .cap p { font-size: 15px; }
     .chapter .hintbar { display: none; }
-    nav .chapter-ind, nav ul { display: none; }
     .hero h1 { font-size: 30px; letter-spacing: 0; }
     .presents { font-size: 10px; letter-spacing: 2px; }
     .hero .tagline { font-size: 15px; }
@@ -204,6 +209,9 @@
   }
 
   .burger { display: none; background: none; border: 0; color: var(--white); font-size: 26px; cursor: pointer; z-index: 130; }
+  /* бургер: ☰, а когда меню открыто — ✕ (авто-синхрон через :has, не зависит от JS) */
+  .burger::before { content: '\2630'; }
+  body:has(.mmenu.open) .burger::before { content: '\2715'; }
   .mmenu {
     position: fixed; inset: 0; background: #05080d; z-index: 120;
     display: none; flex-direction: column; align-items: center; justify-content: center; gap: 30px;
@@ -211,7 +219,11 @@
   .mmenu.open { display: flex; }
   .mmenu a { color: var(--white); font-size: 22px; text-decoration: none; letter-spacing: 1px; font-weight: 600; }
   .mmenu .tel { color: var(--teal); }
-  @media (max-width: 720px) { .burger { display: block; } }
+  /* меню из 5 ссылок перестаёт помещаться раньше «телефонной» ширины — сворачиваем в бургер */
+  @media (max-width: 880px) {
+    nav ul { display: none; }
+    .burger { display: block; }
+  }
 </style>
 <link rel="canonical" href="https://dentalux66.ru/">
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -222,7 +234,7 @@
 <meta property="og:locale" content="ru_RU">
 <meta property="og:site_name" content="Дента Люкс">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Dentist", "name": "Стоматологическая клиника «Дента Люкс»", "legalName": "клиника «Дента Люкс»", "url": "https://dentalux66.ru/", "image": "https://dentalux66.ru/dental-hero-frame.png", "telephone": "+7 (900) 000-00-00", "address": {"@type": "PostalAddress", "streetAddress": "ул. Центральная, д. 1", "addressLocality": "р.п. Верх-Нейвинский", "addressRegion": "Свердловская область", "postalCode": "624170", "addressCountry": "RU"}, "priceRange": "₽₽", "currenciesAccepted": "RUB", "areaServed": ["Верх-Нейвинский", "Новоуральск", "Невьянский район"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Dentist", "name": "Стоматологическая клиника «Дента Люкс»", "legalName": "клиника «Дента Люкс»", "url": "https://dentalux66.ru/", "image": "https://dentalux66.ru/dental-hero-frame.jpg", "telephone": "+7 (900) 000-00-00", "address": {"@type": "PostalAddress", "streetAddress": "ул. Центральная, д. 1", "addressLocality": "р.п. Верх-Нейвинский", "addressRegion": "Свердловская область", "postalCode": "624170", "addressCountry": "RU"}, "priceRange": "₽₽", "currenciesAccepted": "RUB", "areaServed": ["Верх-Нейвинский", "Новоуральск", "Невьянский район"]}</script>
 </head>
 <body>
 
@@ -240,9 +252,9 @@
     <li><a href="#team">Команда</a></li>
     <li><a href="#contact">Контакты</a></li>
   </ul>
-  <button class="burger" aria-label="Меню" onclick="document.getElementById('mmenu').classList.toggle('open')">☰</button>
+  <button class="burger" aria-label="Меню" onclick="document.getElementById('mmenu').classList.toggle('open')"></button>
 </nav>
-<div class="mmenu" id="mmenu">
+<div class="mmenu" id="mmenu" onclick="if(event.target===this)this.classList.remove('open')">
   <a href="#about" onclick="document.getElementById('mmenu').classList.remove('open')">О клинике</a>
   <a href="about.html" onclick="document.getElementById('mmenu').classList.remove('open')">О стоматологии</a>
   <a href="#services" onclick="document.getElementById('mmenu').classList.remove('open')">Услуги</a>
@@ -253,7 +265,7 @@
 
 <!-- ПРОЛОГ -->
 <header class="hero" id="top">
-  <video autoplay muted loop playsinline poster="dental-hero-frame.png">
+  <video autoplay muted loop playsinline preload="auto" poster="dental-hero-frame.jpg">
     <source src="dental-hero-video.mp4" type="video/mp4">
   </video>
   <div class="hero-content">
@@ -285,7 +297,7 @@
 <!-- ГЛАВА 1 -->
 <div class="chapter" data-chapter="Глава 01 — Сканирование">
   <div class="stage">
-    <video muted playsinline preload="auto"><source src="scene-01-scrub.mp4" type="video/mp4"></video>
+    <video muted playsinline preload="none" poster="scene-01-poster.jpg"><source src="scene-01-scrub-540.mp4" media="(max-width: 820px)" type="video/mp4"><source src="scene-01-scrub.mp4" type="video/mp4"></video>
     <div class="cap">
       <div class="num">01</div>
       <h2>Сканер вместо слепков</h2>
@@ -298,7 +310,7 @@
 <!-- ГЛАВА 2 -->
 <div class="chapter" data-chapter="Глава 02 — Моделирование">
   <div class="stage">
-    <video muted playsinline preload="auto"><source src="scene-02-scrub.mp4" type="video/mp4"></video>
+    <video muted playsinline preload="none" poster="scene-02-poster.jpg"><source src="scene-02-scrub-540.mp4" media="(max-width: 820px)" type="video/mp4"><source src="scene-02-scrub.mp4" type="video/mp4"></video>
     <div class="cap">
       <div class="num">02</div>
       <h2>Виртуальная примерка улыбки</h2>
@@ -383,7 +395,7 @@
 <!-- ГЛАВА 3 -->
 <div class="chapter" data-chapter="Глава 03 — 3D-печать">
   <div class="stage">
-    <video muted playsinline preload="auto"><source src="scene-03-scrub.mp4" type="video/mp4"></video>
+    <video muted playsinline preload="none" poster="scene-03-poster.jpg"><source src="scene-03-scrub-540.mp4" media="(max-width: 820px)" type="video/mp4"><source src="scene-03-scrub.mp4" type="video/mp4"></video>
     <div class="cap">
       <div class="num">03</div>
       <h2>Печать коронки — 90 минут</h2>
@@ -396,7 +408,7 @@
 <!-- ГЛАВА 4 -->
 <div class="chapter" data-chapter="Глава 04 — Результат">
   <div class="stage">
-    <video muted playsinline preload="auto"><source src="scene-04-scrub.mp4" type="video/mp4"></video>
+    <video muted playsinline preload="none" poster="scene-04-poster.jpg"><source src="scene-04-scrub-540.mp4" media="(max-width: 820px)" type="video/mp4"><source src="scene-04-scrub.mp4" type="video/mp4"></video>
     <div class="cap">
       <div class="num">04</div>
       <h2>Всё — за один визит</h2>
@@ -460,6 +472,19 @@
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 <script>
 gsap.registerPlugin(ScrollTrigger);
+
+/* ---------- ЗАПОМИНАНИЕ ПОЗИЦИИ СКРОЛЛА ----------
+   При переходе на страницу услуги и возврате «назад» браузер вернёт нас
+   ровно в то место, откуда мы ушли (при Lenis нативное восстановление
+   ломается, поэтому делаем его вручную). */
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+const SCROLL_KEY = 'dl-scroll:' + location.pathname;
+function saveScrollPos() {
+  try { sessionStorage.setItem(SCROLL_KEY, String(Math.round(window.scrollY || window.pageYOffset || 0))); } catch (e) {}
+}
+addEventListener('pagehide', saveScrollPos);
+addEventListener('beforeunload', saveScrollPos);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveScrollPos(); });
 
 let navLock = false, navLockTimer = 0; // переход по якорю: главы не перехватывают скролл
 
@@ -626,7 +651,37 @@ function setChapter(name, inChapter) {
 /* recalc positions once everything is created */
 ScrollTrigger.sort();
 ScrollTrigger.refresh();
-addEventListener('load', () => ScrollTrigger.refresh());
+
+/* ---------- ВОССТАНОВЛЕНИЕ ПОЗИЦИИ / ПЕРЕХОД ПО ЯКОРЮ ПРИ ЗАГРУЗКЕ ----------
+   Возврат «назад» с страницы услуги -> прыгаем в сохранённое место.
+   Обычный переход по ссылке вида index.html#services -> прыгаем к секции. */
+function isBackForward() {
+  const nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+  if (nav) return nav.type === 'back_forward';
+  return performance.navigation && performance.navigation.type === 2; // старый API
+}
+function jumpTo(y) {
+  if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
+  else window.scrollTo(0, y);
+}
+function restoreScrollPos() {
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  ScrollTrigger.refresh();
+  if (isBackForward()) {
+    let y = NaN;
+    try { y = parseFloat(sessionStorage.getItem(SCROLL_KEY)); } catch (e) {}
+    if (!isNaN(y) && y > 0) { jumpTo(y); return true; }
+  } else if (location.hash.length > 1) {
+    const el = document.querySelector(location.hash);
+    if (el) { jumpTo(el.getBoundingClientRect().top + (window.scrollY || 0)); return true; }
+  }
+  return false;
+}
+/* пробуем сразу и повторяем после полной загрузки (высоты пиннинга могут сдвинуться) */
+restoreScrollPos();
+addEventListener('load', () => { ScrollTrigger.refresh(); restoreScrollPos(); });
+/* возврат из bfcache: DOM и позиция сохранены, но пересинхронизируем скроллер */
+addEventListener('pageshow', e => { if (e.persisted) { ScrollTrigger.refresh(); restoreScrollPos(); } });
 
 /* iOS: unlock programmatic seeking */
 document.addEventListener('touchstart', () => {

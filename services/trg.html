@@ -60,6 +60,9 @@
   @media (max-width: 720px) { nav ul { display: none; } }
 
   .burger { display: none; background: none; border: 0; color: var(--white); font-size: 26px; cursor: pointer; z-index: 130; }
+  /* бургер: ☰, а когда меню открыто — ✕ (авто-синхрон через :has, не зависит от JS) */
+  .burger::before { content: '\2630'; }
+  body:has(.mmenu.open) .burger::before { content: '\2715'; }
   .mmenu {
     position: fixed; inset: 0; background: #05080d; z-index: 120;
     display: none; flex-direction: column; align-items: center; justify-content: center; gap: 30px;
@@ -80,7 +83,7 @@
 <meta property="og:locale" content="ru_RU">
 <meta property="og:site_name" content="Дента Люкс">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Service", "name": "Телерентгенография (ТРГ)", "serviceType": "Телерентгенография (ТРГ)", "url": "https://dentalux66.ru/services/trg.html", "provider": {"@context": "https://schema.org", "@type": "Dentist", "name": "Стоматологическая клиника «Дента Люкс»", "legalName": "клиника «Дента Люкс»", "url": "https://dentalux66.ru/", "image": "https://dentalux66.ru/dental-hero-frame.png", "telephone": "+7 (900) 000-00-00", "address": {"@type": "PostalAddress", "streetAddress": "ул. Центральная, д. 1", "addressLocality": "р.п. Верх-Нейвинский", "addressRegion": "Свердловская область", "postalCode": "624170", "addressCountry": "RU"}, "priceRange": "₽₽", "currenciesAccepted": "RUB", "areaServed": ["Верх-Нейвинский", "Новоуральск", "Невьянский район"]}, "areaServed": ["Верх-Нейвинский", "Новоуральск"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Service", "name": "Телерентгенография (ТРГ)", "serviceType": "Телерентгенография (ТРГ)", "url": "https://dentalux66.ru/services/trg.html", "provider": {"@context": "https://schema.org", "@type": "Dentist", "name": "Стоматологическая клиника «Дента Люкс»", "legalName": "клиника «Дента Люкс»", "url": "https://dentalux66.ru/", "image": "https://dentalux66.ru/dental-hero-frame.jpg", "telephone": "+7 (900) 000-00-00", "address": {"@type": "PostalAddress", "streetAddress": "ул. Центральная, д. 1", "addressLocality": "р.п. Верх-Нейвинский", "addressRegion": "Свердловская область", "postalCode": "624170", "addressCountry": "RU"}, "priceRange": "₽₽", "currenciesAccepted": "RUB", "areaServed": ["Верх-Нейвинский", "Новоуральск", "Невьянский район"]}, "areaServed": ["Верх-Нейвинский", "Новоуральск"]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://dentalux66.ru/"}, {"@type": "ListItem", "position": 2, "name": "Услуги", "item": "https://dentalux66.ru/#services"}, {"@type": "ListItem", "position": 3, "name": "Телерентгенография (ТРГ)", "item": "https://dentalux66.ru/services/trg.html"}]}</script>
 </head>
 <body>
@@ -92,9 +95,9 @@
     <li><a href="../index.html#team">Команда</a></li>
     <li><a href="../index.html#contact">Контакты</a></li>
   </ul>
-  <button class="burger" aria-label="Меню" onclick="document.getElementById('mmenu').classList.toggle('open')">☰</button>
+  <button class="burger" aria-label="Меню" onclick="document.getElementById('mmenu').classList.toggle('open')"></button>
 </nav>
-<div class="mmenu" id="mmenu">
+<div class="mmenu" id="mmenu" onclick="if(event.target===this)this.classList.remove('open')">
   <a href="../index.html#about" onclick="document.getElementById('mmenu').classList.remove('open')">О клинике</a>
   <a href="../about.html" onclick="document.getElementById('mmenu').classList.remove('open')">О стоматологии</a>
   <a href="../index.html#services" onclick="document.getElementById('mmenu').classList.remove('open')">Услуги</a>
