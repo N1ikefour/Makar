@@ -272,7 +272,7 @@
 <section class="interlude" id="about">
   <div class="sec-tag reveal" data-anim>О клинике</div>
   <h2 class="reveal" data-anim>Качественная стоматология — это улыбка на долгие годы</h2>
-  <p class="lead reveal" data-anim>Мы предлагаем широкий спектр стоматологических услуг: терапевтическое и хирургическое лечение зубов, протезирование, ортодонтию, пародонтологическое лечение и эстетическую стоматологию. Дальше вы увидите, как современные технологии клиники работают на вашу улыбку — прокручивайте медленно.</p>
+  <p class="lead reveal" data-anim>Мы предлагаем широкий спектр стоматологических услуг: терапевтическое и хирургическое лечение зубов, протезирование, ортодонтию, пародонтологическое лечение и эстетическую стоматологию. Дальше вы увидите, как современные технологии клиники работают на вашу улыбку: долистайте до сцены — и она плавно проиграется сама.</p>
   <a class="btn btn-ghost reveal" data-anim href="about.html" style="margin-top:30px">Лицензии, документы и реквизиты →</a>
   <div class="stats">
     <div class="stat reveal" data-anim><div class="num" data-count="2006">0</div><div class="lbl">год основания клиники</div></div>
@@ -291,7 +291,7 @@
       <h2>Сканер вместо слепков</h2>
       <p>Внутриротовая камера бесконтактно фотографирует зубы и дёсны и переводит изображение в 3D. Никаких неприятных слепков — особенно важно при выраженном рвотном рефлексе.</p>
     </div>
-    <div class="hintbar">Скролл управляет камерой</div>
+    <div class="hintbar">Сцена проигрывается сама</div>
   </div>
 </div>
 
@@ -304,7 +304,7 @@
       <h2>Виртуальная примерка улыбки</h2>
       <p>По 3D-скану моделируется форма будущей коронки. Новые зубы можно примерить на компьютере и посмотреть, как улыбка выглядит со всех сторон — ещё до начала лечения.</p>
     </div>
-    <div class="hintbar">Скролл управляет камерой</div>
+    <div class="hintbar">Сцена проигрывается сама</div>
   </div>
 </div>
 
@@ -389,7 +389,7 @@
       <h2>Печать коронки — 90 минут</h2>
       <p>Файл отправляется на 3D-принтер, и всего за час-полтора готова цельнокерамическая коронка — из материала, по прочности не уступающего натуральным зубным тканям. Раньше на это уходила неделя.</p>
     </div>
-    <div class="hintbar">Скролл управляет камерой</div>
+    <div class="hintbar">Сцена проигрывается сама</div>
   </div>
 </div>
 
@@ -402,7 +402,7 @@
       <h2>Всё — за один визит</h2>
       <p>Напечатанная коронка прилегает с микронной точностью — так плотно, как невозможно добиться вручную. Пришли утром — ушли с новой улыбкой. Ни дня без зубов.</p>
     </div>
-    <div class="hintbar">Скролл управляет камерой</div>
+    <div class="hintbar">Сцена проигрывается сама</div>
   </div>
 </div>
 
@@ -461,16 +461,25 @@
 <script>
 gsap.registerPlugin(ScrollTrigger);
 
+let navLock = false, navLockTimer = 0; // переход по якорю: главы не перехватывают скролл
+
 /* smooth inertia scroll: колесо «докатывает» страницу плавно */
+let lenis = null;
 if (window.Lenis) {
-  const lenis = new Lenis({ lerp: 0.08, wheelMultiplier: 1.1, smoothWheel: true });
+  lenis = new Lenis({ lerp: 0.08, wheelMultiplier: 1.1, smoothWheel: true });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add(t => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
   /* плавные переходы по якорям меню */
   document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
     const id = a.getAttribute('href');
-    if (id.length > 1 && document.querySelector(id)) { e.preventDefault(); lenis.scrollTo(id); }
+    if (id.length > 1 && document.querySelector(id)) {
+      e.preventDefault();
+      navLock = true;
+      clearTimeout(navLockTimer);
+      navLockTimer = setTimeout(() => navLock = false, 4000);
+      lenis.scrollTo(id, { lock: true, onComplete: () => { clearTimeout(navLockTimer); navLock = false; } });
+    }
   }));
 }
 
@@ -510,9 +519,65 @@ document.querySelectorAll('[data-count]').forEach(el => {
   });
 });
 
-/* ---------- FILM CHAPTERS ---------- */
+/* ---------- FILM CHAPTERS ----------
+   Долистали до главы — сайт сам плавно прокручивает сцену от начала до конца
+   (видео проигрывается скроллом) и останавливается. Жест «вниз» или Esc —
+   домотать сцену быстрее. Вверх сцена отматывается доводкой без блокировки. */
 const indEl = document.getElementById('chapterInd');
 const bars = [document.querySelector('.bar.top'), document.querySelector('.bar.bottom')];
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let scene = null;      // активное автопроигрывание: { st, hint, t0, acc, fast }
+let lastInput = -1e9;  // время последнего реального ввода: сцена стартует только от действий
+                       // пользователя, а не от восстановления скролла или прыжка к #якорю
+['wheel', 'touchstart', 'touchmove', 'keydown', 'pointerdown'].forEach(ev =>
+  addEventListener(ev, () => { lastInput = performance.now(); }, { passive: true }));
+
+const easeScene = t => -(Math.cos(Math.PI * t) - 1) / 2;
+
+function playScene(st, video, hint) {
+  if (!lenis || navLock || scene || reduceMotion) return;
+  if (performance.now() - lastInput > 3000) return;
+  scene = { st, hint, t0: performance.now(), acc: 0, fast: false };
+  if (hint) hint.textContent = 'Идёт сцена…';
+  const dur = Math.min(Math.max(video.duration || 4.5, 3), 6.5);
+  const roll = () => {
+    if (scene && scene.fast) return; // уже доматываем жестом
+    lenis.scrollTo(st.end, { duration: dur, lock: true, easing: easeScene, onComplete: endScene });
+  };
+  /* при быстром «влёте» вглубь главы мягко возвращаемся к её началу:
+     стейдж запинен на весь экран, так что виден только кадр видео */
+  if ((lenis.scroll ?? window.scrollY) - st.start > 24) {
+    lenis.scrollTo(st.start, { duration: .35, lock: true, easing: t => t * (2 - t), onComplete: roll });
+  } else roll();
+}
+
+function endScene() {
+  if (scene && scene.hint) scene.hint.textContent = 'Листайте дальше';
+  scene = null;
+}
+
+function skipScene() {
+  if (!scene || scene.fast) return;
+  scene.fast = true;
+  lenis.scrollTo(scene.st.end, { duration: .6, lock: true, easing: t => t * (2 - t), onComplete: endScene });
+}
+
+/* нетерпеливый жест «вниз» во время сцены — быстро домотать её до конца */
+addEventListener('wheel', e => {
+  if (!scene || performance.now() - scene.t0 < 350 || e.deltaY <= 0) return;
+  scene.acc += e.deltaY;
+  if (scene.acc > 360) skipScene();
+}, { passive: true });
+let touchY0 = null;
+addEventListener('touchstart', e => { touchY0 = e.touches[0].clientY; }, { passive: true });
+addEventListener('touchmove', e => {
+  if (!scene || touchY0 == null || performance.now() - scene.t0 < 350) return;
+  if (touchY0 - e.touches[0].clientY > 110) skipScene();
+}, { passive: true });
+addEventListener('keydown', e => {
+  if (scene && ['Escape', ' ', 'PageDown', 'ArrowDown', 'End'].includes(e.key)) { e.preventDefault(); skipScene(); }
+});
 
 document.querySelectorAll('.chapter').forEach(ch => {
   const video = ch.querySelector('video');
@@ -521,6 +586,7 @@ document.querySelectorAll('.chapter').forEach(ch => {
   const hint = ch.querySelector('.hintbar');
   const name = ch.dataset.chapter;
   video.pause();
+  if ((reduceMotion || !lenis) && hint) hint.textContent = 'Скролл управляет камерой';
 
   /* warm up: force-load the video when the chapter is one screen away */
   ScrollTrigger.create({
@@ -532,8 +598,9 @@ document.querySelectorAll('.chapter').forEach(ch => {
   ScrollTrigger.create({
     trigger: stage, start: 'top top', end: '+=120%',
     pin: true, scrub: 1.2, anticipatePin: 1,
-    /* «как книгу»: один жест — сцена сама плавно доигрывает до конца и останавливается */
-    snap: { snapTo: [0, 1], duration: { min: .9, max: 2.4 }, delay: .08, ease: 'power1.inOut' },
+    /* доводка для ручного скролла: вверх — к началу сцены, вниз — к концу */
+    snap: { snapTo: (v, self) => (self && self.direction < 0 ? 0 : 1), duration: { min: .9, max: 2.4 }, delay: .08, ease: 'power1.inOut' },
+    onEnter(self) { playScene(self, video, hint); },
     onUpdate(self) {
       if (!video.duration) { if (video.readyState === 0) video.load(); return; }
       const t = video.duration * self.progress * 0.999;
@@ -542,15 +609,13 @@ document.querySelectorAll('.chapter').forEach(ch => {
     onToggle(self) { setChapter(self.isActive ? name : '', self.isActive); }
   });
 
-  /* caption + hint in/out */
+  /* caption + hint: появляются в начале сцены и остаются видимыми до её конца */
   gsap.timeline({
     scrollTrigger: { trigger: stage, start: 'top top', end: '+=120%', scrub: true }
   })
-  .fromTo(cap, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: .16, ease: 'none' }, .05)
-  .fromTo(hint, { opacity: 0 }, { opacity: 1, duration: .16, ease: 'none' }, .05)
-  .to(cap, { opacity: 1, duration: .55, ease: 'none' })
-  .to(cap, { opacity: 0, y: -40, duration: .14, ease: 'none' })
-  .to(hint, { opacity: 0, duration: .1, ease: 'none' }, '<');
+  .fromTo(cap, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: .18, ease: 'none' }, .05)
+  .fromTo(hint, { opacity: 0 }, { opacity: 1, duration: .18, ease: 'none' }, .05)
+  .to(cap, { opacity: 1, duration: .77, ease: 'none' });
 });
 
 function setChapter(name, inChapter) {
